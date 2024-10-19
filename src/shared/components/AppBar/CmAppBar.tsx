@@ -15,6 +15,7 @@ const tabRoutes = [
   ROUTES.SOLUTIONS_FEED_PAGE,
   ROUTES.CONVERSATIONS_PAGE,
   ROUTES.MYTHS_FEED_PAGE,
+  ROUTES.BADGE_PAGE
 ];
 
 const conversationRoutes = [
