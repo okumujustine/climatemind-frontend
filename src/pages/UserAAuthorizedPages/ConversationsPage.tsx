@@ -88,7 +88,7 @@ function ConversationsPage() {
                   value={friendsName}
                   onChange={(e) => setFriendsName(e.target.value)}
                   helperText={friendsName.length > 20 && 'Name must be less than 20 characters'}
-                  style={{ borderRadius: "10px" }}
+                  style={{ borderRadius: '10px' }}
                 />
 
                 <CmButton2 style={{ marginTop: '20px' }} text="Create Link" onClick={() => handleSubmit} disabled={friendsName === '' || friendsName.length > 20} />
