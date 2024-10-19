@@ -220,6 +220,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     margin: '0 auto',
   },
   topPageSection: { backgroundColor: CM_COLOURS.mainDarkGreen, padding: '8px 8px 32px 8px' },
+  lowerSection: {
+    background: 'linear-gradient(180deg, #FFFFFF 78.34%, rgba(208, 238, 235, 0.6) 141.86%)',
+    paddingBottom: '128px',
+    width: "100%",
+  },
   form: {
     display: 'flex',
     flexDirection: 'column',
@@ -243,10 +248,6 @@ const styles: { [key: string]: React.CSSProperties } = {
   imageBanner: { width: '280px', height: '265px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '100%' },
   image: { display: 'flex', flexDirection: 'column', justifyContent: 'center' },
   HorizontalDivider: { border: '1px solid #BDFADC', width: '188px', alignSelf: 'center' },
-  lowerSection: {
-    background: 'linear-gradient(180deg, #FFFFFF 78.34%, rgba(208, 238, 235, 0.6) 141.86%)',
-    paddingBottom: '128px',
-  },
   lowerSectionContainer: { margin: '16px', marginTop: '64px' },
   weeklyGoal: { display: 'flex', flexDirection: 'column', background: '#F5ECFE', boxShadow: '0px 4px 8px 0px #00000040', border: '1px solid #D0EEEB' },
   weeklyGoalTopSection: { display: 'flex', alignItems: 'center' },
