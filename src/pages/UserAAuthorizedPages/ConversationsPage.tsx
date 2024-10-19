@@ -2,24 +2,39 @@ import { useEffect, useState } from 'react';
 import { CM_COLOURS } from 'const/colors';
 import HelpIcon from '@mui/icons-material/Help';
 
-import { CmButton2, CmTextInput, CmTypography, Page, PageSection } from 'shared/components';
-import { ConversationsDrawer, CopyLinkModal, useConversationInvite } from 'features/conversations';
-import { Card } from '@mui/material';
+import { CmButton2, CmTextInput, CmTypography, Page } from 'shared/components';
+import { ConversationsDrawer, CopyLinkModal, useConversationInvite, useConversations } from 'features/conversations';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { BorderLinearProgress } from 'shared/components/BorderLinearProgress';
 import { CmBadge } from 'shared/components/CmBadge';
+import CmGoalCard from 'shared/components/CmRoundedCard';
+import CmRoundedCard from 'shared/components/CmRoundedCard';
+import { CheckCircle, HourglassTopOutlined } from '@mui/icons-material';
+import CmTextWithIcon from 'shared/components/CmTextWithIcon';
 
 function ConversationsPage() {
   const location = useLocation();
   const [searchParams, _] = useSearchParams();
-  const badges = Array(4).fill({name: "badge name"});
+  const badges = Array(4).fill({ name: 'badge name' });
+
+  const { isLoading, conversations } = useConversations();
+
+  const getConversations = (status: 'complete' | 'ongoing') => {
+    if (status === 'complete') {
+      return conversations?.filter((conversation) => conversation.state === 5);
+    }
+    return conversations?.filter((conversation) => conversation.state !== 5);
+  };
+
+  useEffect(() => {
+    console.log(isLoading);
+  }, []);
 
   // Logic for create link
   const { inviteToConversation } = useConversationInvite();
   const [showCopyLinkModal, setShowCopyLinkModal] = useState(false);
   const [friendsName, setFriendsName] = useState('');
   const [link, setLink] = useState('');
-  console.log(link);
 
   const [conversationDrawerOpen, setConversationDrawerOpen] = useState(false);
 
@@ -43,7 +58,7 @@ function ConversationsPage() {
   return (
     <Page>
       <div style={styles.root}>
-        <PageSection style={{ backgroundColor: CM_COLOURS.mainDarkGreen, padding: '32px' }}>
+        <div style={styles.topPageSection}>
           <CmTypography style={{ color: '#FDFFFC' }} variant="h2">
             Conversation Hub
           </CmTypography>
@@ -51,7 +66,7 @@ function ConversationsPage() {
             <img src="/hompage-conversation.svg" alt="cm conversation image" style={styles.image} />
             <div content="" style={styles.HorizontalDivider}></div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 16px 0px 16px', flexDirection: 'column' }}>
+          <div style={styles.conversationInputContainer}>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <CmTypography style={{ color: '#FDFFFC' }} variant="h3">
@@ -63,66 +78,89 @@ function ConversationsPage() {
             <CmTypography style={{ color: '#FDFFFC', paddingBottom: '16px' }} variant="body">
               Share this link with a friend so they can take the Values Quiz and select topics to discuss! We will email you when they share their results.
             </CmTypography>
-            <Card sx={{ padding: '20px 30px', borderRadius: '20px', boxShadow: '0px 4px 8px 0px #D0EEEB' }}>
+            <CmRoundedCard customStyles={{ boxShadow: '0px 4px 8px 0px #D0EEEB', padding: '16px', gap: 17 }}>
               <form onSubmit={handleSubmit} style={styles.form}>
                 <CmTextInput
+                  variant="outlined"
                   id="friend"
-                  label="Name of recipient"
+                  label="Name"
                   placeholder='Try "Peter Smith" or "Mom"'
                   value={friendsName}
                   onChange={(e) => setFriendsName(e.target.value)}
                   helperText={friendsName.length > 20 && 'Name must be less than 20 characters'}
+                  style={{ borderRadius: "10px" }}
                 />
 
-                <CmButton2 style={{ margin: '20px' }} text="Create Link" onClick={() => handleSubmit} disabled={friendsName === '' || friendsName.length > 20} />
+                <CmButton2 style={{ marginTop: '20px' }} text="Create Link" onClick={() => handleSubmit} disabled={friendsName === '' || friendsName.length > 20} />
               </form>
-            </Card>
+            </CmRoundedCard>
           </div>
           <ConversationsDrawer open={conversationDrawerOpen} onClose={() => setConversationDrawerOpen(false)} />
 
           <CopyLinkModal isOpen={showCopyLinkModal} onClose={() => setShowCopyLinkModal(false)} userBName={friendsName} link={link} />
-        </PageSection>
+        </div>
 
         {/* lower section */}
         <div style={styles.lowerSection}>
-          <div style={{ margin: '16px', marginTop: '64px' }}>
+          <div style={styles.lowerSectionContainer}>
             <CmTypography style={styles.textLeft} variant="h2">
               Your Conversations
             </CmTypography>
+
+            {!conversations || conversations.length == 0 ? (
+              <CmTypography style={styles.textLeft} variant="body">
+                You do not currently have any conversations. Create a quiz link and send it to a friend to get started!
+              </CmTypography>
+            ) : null}
 
             <div style={{ marginTop: '64px' }}>
               <CmTypography style={styles.textLeft} variant="h4">
                 Ongoing
               </CmTypography>
-              <CmTypography style={styles.textLeft} variant="body">
-                You do not currently have any conversations. Create a quiz link and send it to a friend to get started!
-              </CmTypography>
+
+              {getConversations('ongoing')?.map((conversation) => (
+                <CmGoalCard customStyles={{ marginBottom: '16px' }} key={conversation.conversationId} conversationStatus="ongoing">
+                  <div style={{ ...styles.conversationCardContainer, ...{ height: '162px' } }}>
+                    <CmTypography style={styles.textLeft} variant="h1">
+                      {conversation.userB.name}
+                    </CmTypography>
+                    <div>
+                      <CmTextWithIcon text="Link Created" icon={conversation.state >= 0 && conversation.state <= 5 ? <CheckCircle /> : <HourglassTopOutlined />} />
+                      <CmTextWithIcon text="Topics Selected" icon={conversation.state == 0 ? <HourglassTopOutlined /> : <CheckCircle />} />
+                      <CmTextWithIcon text="Talked" icon={<HourglassTopOutlined />} />
+                    </div>
+                  </div>
+                </CmGoalCard>
+              ))}
             </div>
 
             <div style={{ marginTop: '64px' }}>
               <CmTypography style={styles.textLeft} variant="h4">
                 Completed
               </CmTypography>
-              <Card sx={{ padding: '20px 30px', borderRadius: '20px', boxShadow: '0px 4px 4px 0px #00000040', background: 'linear-gradient(90.41deg, #FFFFFF -21.97%, rgba(255, 199, 39, 0.9) 96.54%)' }}>
-                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <CmTypography style={styles.textLeft} variant="h1">
-                    Kameron
-                  </CmTypography>
-                  <CmTypography style={styles.textLeft} variant="h4">
-                    Completed
-                  </CmTypography>
-                </div>
-              </Card>
+              {getConversations('complete')?.map((conversation) => (
+                <CmGoalCard customStyles={{ marginBottom: '16px' }} key={conversation.conversationId} conversationStatus="completed">
+                  <div style={styles.conversationCardContainer}>
+                    <CmTypography style={styles.textLeft} variant="h1">
+                      {conversation.userB.name}
+                    </CmTypography>
+                    <div>
+                      <CmTypography variant="h4">Completed</CmTypography>
+                    </div>
+                  </div>
+                </CmGoalCard>
+              ))}
             </div>
+
             <div>
               <CmTypography style={{ marginTop: '64px', textAlign: 'left' }} variant="h2">
                 Weekly Goal
               </CmTypography>
-              <Card sx={styles.weeklyGoal}>
+              <CmRoundedCard customStyles={styles.weeklyGoal}>
                 <div style={styles.weeklyGoalTopSection}>
                   <img style={styles.weeklyGoalImage} src="/weekly-goal.svg" alt="cm weely goals" />
                   <div style={{ padding: '10px' }}>
-                    <CmTypography variant="h4" style={{ padding: '0px', margin: '0px', textAlign: 'left' }}>
+                    <CmTypography variant="h4" style={styles.weeklyGoalTitle}>
                       Almost there!
                     </CmTypography>
                     <CmTypography style={{ textAlign: 'left' }} variant="body">
@@ -134,30 +172,30 @@ function ConversationsPage() {
                   <CmTypography style={{ textAlign: 'right' }} variant="body">
                     <span style={{ fontWeight: 'bolder' }}>0/1</span> Conversations
                   </CmTypography>
-                  <BorderLinearProgress style={{ margin: '16px 0px', backgroundColor: 'white' }} variant="determinate" value={50} />
+                  <BorderLinearProgress style={styles.progressBar} variant="determinate" value={50} />
                 </div>
-              </Card>
+              </CmRoundedCard>
 
-              <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', margin: '64px 32px' }}>
+              <div style={styles.resourcesArea}>
                 <CmTypography style={{ textAlign: 'center', paddingBottom: '32px' }} variant="body">
                   Want more guidance on how to have great conversations?
                 </CmTypography>
-                <CmButton2 style={{ backgroundColor: 'white' }} text="Resources" onClick={() => handleSubmit} />
+                <CmButton2 style={styles.resourcesButton} text="Resources" onClick={() => handleSubmit} />
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={styles.badgeSectionHeader}>
                   <CmTypography style={styles.textLeft} variant="h4">
                     Your Climate Badges
                   </CmTypography>
-                  <CmTypography style={{ textDecoration: "underline" }} variant="body">
+                  <CmTypography style={{ textDecoration: 'underline' }} variant="body">
                     SEE ALL
                   </CmTypography>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-around' }}>
                   {badges.map((badgeInfo) => (
                     <div>
-                      <CmBadge name={badgeInfo.name}/>
+                      <CmBadge name={badgeInfo.name} />
                     </div>
                   ))}
                 </div>
@@ -181,6 +219,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     maxWidth: 640,
     margin: '0 auto',
   },
+  topPageSection: { backgroundColor: CM_COLOURS.mainDarkGreen, padding: '8px 8px 32px 8px' },
   form: {
     display: 'flex',
     flexDirection: 'column',
@@ -201,17 +240,25 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '100vw',
     height: 88,
   },
-  imageBanner: { width: '280px', height: '265px' },
+  imageBanner: { width: '280px', height: '265px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '100%' },
   image: { display: 'flex', flexDirection: 'column', justifyContent: 'center' },
   HorizontalDivider: { border: '1px solid #BDFADC', width: '188px', alignSelf: 'center' },
   lowerSection: {
-    background: "linear-gradient(180deg, #FFFFFF 78.34%, rgba(208, 238, 235, 0.6) 141.86%)",
-    paddingBottom: "128px"
+    background: 'linear-gradient(180deg, #FFFFFF 78.34%, rgba(208, 238, 235, 0.6) 141.86%)',
+    paddingBottom: '128px',
   },
-  weeklyGoal: { display: 'flex', flexDirection: 'column', padding: '20px 30px', borderRadius: '20px', background: '#F5ECFE', boxShadow: '0px 4px 4px 0px #00000040}}' },
+  lowerSectionContainer: { margin: '16px', marginTop: '64px' },
+  weeklyGoal: { display: 'flex', flexDirection: 'column', background: '#F5ECFE', boxShadow: '0px 4px 8px 0px #00000040', border: '1px solid #D0EEEB' },
   weeklyGoalTopSection: { display: 'flex', alignItems: 'center' },
   weeklyGoalImage: { width: '105px', height: '100px' },
+  weeklyGoalTitle: { padding: '0px', margin: '0px', textAlign: 'left' },
   textLeft: { textAlign: 'left' },
+  resourcesArea: { display: 'flex', justifyContent: 'center', flexDirection: 'column', margin: '64px 32px' },
+  resourcesButton: { backgroundColor: 'white', border: '1px solid #07373B', boxShadow: '0px 4px 4px 0px #00000040' },
+  conversationCardContainer: { display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  badgeSectionHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  progressBar: { margin: '16px 0px', backgroundColor: 'white' },
+  conversationInputContainer: { display: 'flex', justifyContent: 'center', padding: '16px 16px 0px 16px', flexDirection: 'column' },
 };
 
 export default ConversationsPage;

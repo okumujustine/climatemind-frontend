@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useMediaQuery } from '@mui/material';
-import { Home, EmojiObjects, QuestionAnswer, Announcement } from '@mui/icons-material';
+import { Home, EmojiObjects, Announcement, Star } from '@mui/icons-material';
 
 import ROUTES from 'router/RouteConfig';
 import CmBottomTabs from './CmBottomTabs';
@@ -11,12 +11,12 @@ import { useAppSelector } from 'store/hooks';
 const tabRoutes = [
   ROUTES.CLIMATE_FEED_PAGE,
   ROUTES.SOLUTIONS_FEED_PAGE,
-  ROUTES.CONVERSATIONS_INTRO_PAGE,
+  ROUTES.CONVERSATIONS_PAGE,
   ROUTES.MYTHS_FEED_PAGE,
+  ROUTES.BADGE_PAGE,
 ];
 
 const conversationRoutes = [
-  ROUTES.CONVERSATIONS_INTRO_PAGE,
   ROUTES.CONVERSATIONS_PAGE,
   ROUTES.SHARED_VALUES_PAGE,
   ROUTES.USERA_SHARED_FEED_PAGE,
@@ -59,18 +59,22 @@ function CmBottomTabsNavigation() {
 
   return (
     <CmBottomTabs value={selectedTab} onChange={(_, newValue) => changeTabHandler(newValue)} style={{ backgroundColor: 'white' }}>
-      <CmBottomTab icon={<Home fontSize="small" />} label="Home" />
+      <CmBottomTab icon={<Home fontSize="small" />} label="Impact" />
       <CmBottomTab
         icon={<EmojiObjects fontSize="small" />}
         label="Solutions"
       />
       <CmBottomTab
-        icon={<QuestionAnswer fontSize="small" />}
-        label="Talk"
+        icon={<Home fontSize="small" />}
+        label="Hub"
       />
       <CmBottomTab
         icon={<Announcement fontSize="small" />}
         label="Myths"
+      />
+      <CmBottomTab
+        icon={<Star fontSize="small" />}
+        label="Badges"
       />
     </CmBottomTabs>
   );
